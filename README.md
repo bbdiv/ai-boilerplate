@@ -1,0 +1,185 @@
+# AI Config Boilerplate
+
+**Version: 1.1.0** — last updated 2026-04-10
+
+A ready-to-copy template for wiring up a consistent AI configuration across any project — regardless of which tool your team uses.
+
+## The problem it solves
+
+Teams rarely use a single AI tool. Some people use Claude Code, others use Cursor, Windsurf, or open-source models. Each tool has its own entry-point convention, so without a shared setup, every developer gets a different quality of AI assistance — or none at all.
+
+This boilerplate solves that by separating two things:
+
+- **Tool entry points** — thin files each tool knows to look for, one per tool.
+- **Shared knowledge** — the actual conventions, skills, and guides that live in `.ai/` and are pointed to by every entry point.
+
+The knowledge lives in one place. Every tool reads it.
+
+---
+
+## Structure
+
+```
+.
+├── CLAUDE.md                        # Claude Code entry point
+├── AGENTS.md                        # Google Antigravity + cross-tool fallback
+├── .cursor/rules/project.mdc        # Cursor entry point
+├── .windsurfrules                   # Windsurf entry point
+├── .github/copilot-instructions.md  # GitHub Copilot entry point
+├── .husky/
+│   └── pre-commit                   # Git hook — runs validation when .ai/ files change
+│
+└── .ai/
+    ├── instructions.md              # The operating manual (fill this in)
+    ├── scripts/
+    │   └── validate-config.mjs      # Validation script — checks skills index integrity
+    ├── skills/
+    │   └── README.md                # What skills are and how to write them
+    ├── workflow/
+    │   └── README.md                # What workflow guides are and how to write them
+    ├── agents/
+    │   ├── README.md                # What agents are and how to define them
+    │   ├── pr-review/AGENT.md       # Reviews PRs against project conventions
+    │   └── ai-config-audit/AGENT.md # Audits skills for staleness and semantic drift
+    └── context/
+        └── README.md                # What reference docs go here and why
+```
+
+### Entry points
+
+Each file is a thin stub — it identifies the project, lists the `.ai/` folder layout, and tells the AI to read `.ai/instructions.md` for the full picture. They are intentionally short so the real knowledge stays in one place and never gets out of sync.
+
+| File | Tool |
+|---|---|
+| `CLAUDE.md` | Claude Code |
+| `AGENTS.md` | Google Antigravity (also picked up by Claude Code and others as a cross-tool fallback) |
+| `.cursor/rules/project.mdc` | Cursor |
+| `.windsurfrules` | Windsurf |
+| `.github/copilot-instructions.md` | GitHub Copilot |
+
+### `.ai/` — the knowledge base
+
+| Path | Purpose |
+|---|---|
+| `instructions.md` | Project operating manual: stack, repo map, conventions, dev commands, and the skills index. This is the main file to fill in. |
+| `skills/` | Task recipes — step-by-step instructions for recurring implementation tasks (e.g. "how to add a query hook"). One skill per folder, each named `SKILL.md`. |
+| `workflow/` | Feature-level guides that orchestrate multiple skills in order (e.g. "how to build a list view end to end"). |
+| `agents/` | Definitions for purpose-built agents scoped to specific recurring jobs (e.g. a PR reviewer, a migration checker). |
+| `context/` | Reference knowledge for specific libraries, UI kits, or APIs — consulted when the AI needs to use something with non-obvious conventions. |
+
+---
+
+## How to use
+
+### 1. Copy into your project root
+
+```bash
+cp -r boilerplate/. your-project/
+```
+
+### 2. Replace `{{project-name}}`
+
+Find and replace all occurrences of `{{project-name}}` across the entry-point files with your actual project name.
+
+### 3. Fill in `.ai/instructions.md`
+
+This is the only file with real content to write. Fill in:
+- Project stack and entry points
+- Repo map (top-level folders and what goes where)
+- Key conventions ("if you're adding X, do Y")
+- Dev commands
+- Skills index (add rows as you create skills)
+
+Everything else starts empty — the READMEs explain what to add and when.
+
+### 4. Add skills as you go
+
+Don't try to write all your skills upfront. Add a skill when you notice the AI getting a recurring task wrong, or when a pattern in your codebase is non-obvious enough to warrant guidance. Each skill lives in its own folder:
+
+```
+.ai/skills/
+  <skill-name>/
+    SKILL.md
+```
+
+Then add a row to the skills index in `.ai/instructions.md`.
+
+### 5. Set up commit hooks
+
+The boilerplate ships a validation script at `.ai/scripts/validate-config.mjs` that catches mechanical drift automatically:
+
+- A `SKILL.md` file exists with no entry in the skills index
+- The skills index references a path that doesn't exist
+- A `SKILL.md` is missing the `last_reviewed` frontmatter field
+- A skill's `last_reviewed` is older than 90 days (warning only — doesn't block)
+
+The boilerplate already ships `.husky/pre-commit` and `.ai/scripts/validate-config.mjs`. You just need to install Husky and add two entries to `package.json`.
+
+**Install Husky** (pick your package manager):
+
+```bash
+# pnpm
+pnpm add -D husky
+
+# npm
+npm install --save-dev husky
+
+# yarn
+yarn add --dev husky
+```
+
+**Add to `package.json`:**
+
+```json
+"scripts": {
+  "validate:ai-config": "node .ai/scripts/validate-config.mjs",
+  "prepare": "husky"
+}
+```
+
+The `prepare` script is the key part — it runs automatically on `install`, so every teammate gets the hooks wired up as soon as they run `pnpm install` (or npm/yarn equivalent). No manual hook setup needed after the initial configuration.
+
+You can also run the validator manually at any time:
+
+```bash
+pnpm validate:ai-config
+# or: node .ai/scripts/validate-config.mjs
+```
+
+---
+
+## Design principles
+
+**One source of truth.** All real knowledge lives in `.ai/`. Entry points are just doors — they don't contain conventions, they point to them.
+
+**Tool-agnostic content.** Everything in `.ai/` is plain Markdown. No proprietary syntax, no tool-specific features. Any AI tool that can read files benefits from it.
+
+**No ambiguity between concepts.** The folder names are intentional:
+- `skills/` = how to do a task
+- `workflow/` = how to build a feature (orchestrates skills)
+- `agents/` = definitions of purpose-built workers (not instructions for workers)
+- `context/` = reference knowledge about external things (libraries, APIs)
+
+**Grow it incrementally.** The boilerplate ships with READMEs, not pre-filled content. A project with three well-written skills is more useful than one with ten half-baked ones.
+
+---
+
+## Keeping projects in sync
+
+Each project initialized from this boilerplate is a snapshot. When the boilerplate improves, existing projects won't automatically get the update.
+
+**Short-term:** track which version a project was initialized from (e.g. in a comment at the top of `CLAUDE.md`). When the boilerplate bumps a version, check the changelog and manually apply relevant changes.
+
+**Long-term:** move this boilerplate to a dedicated git repository. Projects can then pull updates on demand rather than relying on manual sync.
+
+## Changelog
+
+### 1.1.0 — 2026-04-10
+- Added `last_reviewed` to skill frontmatter template to surface stale skills.
+- Added `agents/` folder and PR review agent template.
+- Added skills index reminder: a skill with no index entry is invisible to the agent.
+- Standardized wording across all entry-point files.
+
+### 1.0.0 — 2026-04-10
+- Initial release: entry points for Claude Code, Antigravity, Cursor, Windsurf, Copilot.
+- `.ai/` knowledge base with `instructions.md`, `skills/`, `workflow/`, `agents/`, `context/`.
