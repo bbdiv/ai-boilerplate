@@ -1,5 +1,24 @@
 # Project operating manual — {{project-name}}
 
+## Mandatory workflow — no exceptions
+
+For **every task**, regardless of size or complexity, you must follow `.ai/workflow/task-validation-review/guide.md` in full:
+
+1. **Validate** — restate the task, list acceptance criteria, confirm out-of-scope and constraints. Wait for explicit user confirmation before writing any code.
+2. **Implement** — follow relevant skills from `.ai/skills/`.
+3. **PR review** — run `.ai/agents/pr-review/AGENT.md`. Fix all `❌` findings.
+4. **QA review** — run `.ai/agents/qa-review/AGENT.md` against the acceptance criteria.
+5. **Report** — present the closing summary defined in the workflow, including a **"Flows used"** table that lists every agent, skill, workflow, and rule that was loaded or applied during the task.
+
+> A task that feels too simple to validate is not exempt. The validation step exists precisely for those cases.
+
+## AI config layout
+
+- **`.ai/skills/`** — executable guidance: task recipes to follow when implementing specific types of work.
+- **`.ai/workflow/`** — higher-level guides for feature-sized tasks.
+- **`.ai/agents/`** — purpose-built agent definitions scoped to specific recurring tasks.
+- **`.ai/context/`** — reference knowledge: UI kit docs, API conventions, library guides.
+
 ## Project snapshot
 
 - **Stack**: {{e.g. React 18 + TypeScript}}
