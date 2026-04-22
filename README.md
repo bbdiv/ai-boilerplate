@@ -1,6 +1,6 @@
 # AI Config Boilerplate
 
-**Version: 1.1.0** — last updated 2026-04-10
+**Version: 1.2.0** — last updated 2026-04-22
 
 A ready-to-copy template for wiring up a consistent AI configuration across any project — regardless of which tool your team uses.
 
@@ -23,6 +23,7 @@ The knowledge lives in one place. Every tool reads it.
 .
 ├── CLAUDE.md                        # Claude Code entry point
 ├── AGENTS.md                        # Google Antigravity + cross-tool fallback
+├── GEMINI.md                        # Gemini CLI entry point
 ├── .cursor/rules/project.mdc        # Cursor entry point
 ├── .windsurfrules                   # Windsurf entry point
 ├── .github/copilot-instructions.md  # GitHub Copilot entry point
@@ -53,6 +54,7 @@ Each file is a thin stub — it identifies the project, lists the `.ai/` folder 
 |---|---|
 | `CLAUDE.md` | Claude Code |
 | `AGENTS.md` | Google Antigravity (also picked up by Claude Code and others as a cross-tool fallback) |
+| `GEMINI.md` | Gemini CLI |
 | `.cursor/rules/project.mdc` | Cursor |
 | `.windsurfrules` | Windsurf |
 | `.github/copilot-instructions.md` | GitHub Copilot |
@@ -173,6 +175,13 @@ Each project initialized from this boilerplate is a snapshot. When the boilerpla
 **Long-term:** move this boilerplate to a dedicated git repository. Projects can then pull updates on demand rather than relying on manual sync.
 
 ## Changelog
+
+### 1.2.0 — 2026-04-22
+- Added `GEMINI.md` entry point for Gemini CLI.
+- Added `boilerplate_version` frontmatter in `.ai/instructions.md` for machine-readable version tracking — the validator now reports which boilerplate version a project was initialized from.
+- Shipped `.husky/pre-commit` (previously described in docs but missing from the template).
+- Shipped `.ai/skills/_example/SKILL.md` so validation passes on a fresh checkout and teams have a copy-paste starting point.
+- Validator: rejects invalid `last_reviewed` dates (was silently treated as "stale"), checks `AGENT.md` frontmatter (`name`, `description`), cross-checks `workflow/*/guide.md` against the Workflow guides section, strips HTML comments before parsing so commented example rows are no longer treated as real index entries.
 
 ### 1.1.0 — 2026-04-10
 - Added `last_reviewed` to skill frontmatter template to surface stale skills.

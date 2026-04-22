@@ -1,0 +1,8 @@
+#!/usr/bin/env sh
+
+# Only run AI config validation when .ai/ files are staged — commits that
+# don't touch .ai/ shouldn't pay the cost.
+if git diff --cached --name-only | grep -q '^\.ai/'; then
+  echo "[ai-config] .ai/ files staged — running validation..."
+  node .ai/scripts/validate-config.mjs
+fi

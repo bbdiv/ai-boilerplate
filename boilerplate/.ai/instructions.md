@@ -1,3 +1,7 @@
+---
+boilerplate_version: 1.2.0
+---
+
 # Project operating manual — {{project-name}}
 
 ## Project snapshot
@@ -49,12 +53,16 @@
 
 ## Skills index
 
-<!--
-  List each skill and when to use it. Agents load skills on demand — only
-  when the task matches. Keep descriptions short so the agent can decide
-  quickly whether a skill applies.
+| Task type                         | Skill                                  |
+|-----------------------------------|----------------------------------------|
+| Reference: how to write a skill   | `.ai/skills/_example/SKILL.md`         |
 
-  Example:
+<!--
+  Add rows above as you create skills. Keep descriptions short — agents
+  scan this table to decide whether to load a skill. Delete the `_example`
+  row once you've written your first real skill.
+
+  Fuller example of what a mature index looks like:
 
   | Task type                        | Skill                                          |
   |----------------------------------|------------------------------------------------|

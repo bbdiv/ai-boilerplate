@@ -17,27 +17,42 @@ const INSTRUCTIONS_PATH = join(AI_DIR, 'instructions.md');
 
 // Adjust to match your team's review cadence.
 const STALE_THRESHOLD_DAYS = 90;
+const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-function readIndexedSkillPaths() {
-  const content = readFileSync(INSTRUCTIONS_PATH, 'utf8');
-  const lines = content.split('\n');
+function stripHtmlComments(content) {
+  // Index examples live inside <!-- --> blocks; strip them so they are not
+  // treated as real index entries.
+  return content.replace(/<!--[\s\S]*?-->/g, '');
+}
 
-  let inSection = false;
+function readFrontmatter(content) {
+  const lines = content.split(/\r?\n/);
+  if (lines[0].trim() !== '---') return null;
+  const fields = {};
+  for (let i = 1; i < lines.length; i++) {
+    if (lines[i].trim() === '---') return fields;
+    const match = lines[i].match(/^(\w+):\s*(\S.*)?$/);
+    if (match) fields[match[1]] = match[2] ? match[2].trim() : '';
+  }
+  return null; // no closing delimiter
+}
+
+function readIndexedSkillPaths(content) {
+  // Supports heading-based (## Skills index) and legacy marker-based sections.
+  const lines = content.split(/\r?\n/);
   const paths = new Set();
 
-  // Supports both heading-based (## Skills index) and marker-based index sections.
   const sectionStartMarkers = [
     'Internal project skills',
-    '<!-- IMPORTANT: every new skill must have a row here',
+    'IMPORTANT: every new skill must have a row here',
   ];
   const sectionHeadingRe = /^##\s+skills index/i;
   const nextHeadingRe = /^##\s+/;
 
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-
+  let inSection = false;
+  for (const line of lines) {
     if (!inSection) {
       if (
         sectionStartMarkers.some((m) => line.includes(m)) ||
@@ -47,53 +62,49 @@ function readIndexedSkillPaths() {
       }
       continue;
     }
-
     if (nextHeadingRe.test(line)) break;
-
-    // Extract all backtick-quoted .ai/skills/ paths on this line.
-    // Handles both list format and table format.
     const re = /`(\.ai\/skills\/[^`]+)`/g;
     let m;
-    while ((m = re.exec(line)) !== null) {
-      paths.add(m[1]);
-    }
+    while ((m = re.exec(line)) !== null) paths.add(m[1]);
   }
-
   return paths;
 }
 
-function discoverSkillFiles() {
-  // Only scans files named SKILL.md — ignores README.md and other markdown files.
+function readIndexedWorkflowPaths(content) {
+  const lines = content.split(/\r?\n/);
+  const paths = new Set();
+  const sectionHeadingRe = /^##\s+workflow guides/i;
+  const nextHeadingRe = /^##\s+/;
+
+  let inSection = false;
+  for (const line of lines) {
+    if (!inSection) {
+      if (sectionHeadingRe.test(line)) inSection = true;
+      continue;
+    }
+    if (nextHeadingRe.test(line)) break;
+    const re = /`(\.ai\/workflow\/[^`]+)`/g;
+    let m;
+    while ((m = re.exec(line)) !== null) paths.add(m[1]);
+  }
+  return paths;
+}
+
+function discoverFilesByName(dir, fileName) {
   // Returns paths relative to project root with forward slashes.
   const results = [];
-
-  function walk(dir) {
-    for (const entry of readdirSync(dir, { withFileTypes: true })) {
-      const full = join(dir, entry.name);
+  function walk(d) {
+    for (const entry of readdirSync(d, { withFileTypes: true })) {
+      const full = join(d, entry.name);
       if (entry.isDirectory()) {
         walk(full);
-      } else if (entry.isFile() && entry.name === 'SKILL.md') {
+      } else if (entry.isFile() && entry.name === fileName) {
         results.push(relative(PROJECT_ROOT, full).replace(/\\/g, '/'));
       }
     }
   }
-
-  const skillsDir = join(AI_DIR, 'skills');
-  if (existsSync(skillsDir)) walk(skillsDir);
+  if (existsSync(dir)) walk(dir);
   return results;
-}
-
-function parseFrontmatterField(filePath, field) {
-  const content = readFileSync(filePath, 'utf8');
-  const lines = content.split('\n');
-  if (lines[0].trim() !== '---') return null;
-
-  for (let i = 1; i < lines.length; i++) {
-    if (lines[i].trim() === '---') break;
-    const match = lines[i].match(new RegExp(`^${field}:\\s*(\\S.*)`));
-    if (match) return match[1].trim();
-  }
-  return null;
 }
 
 function daysSince(dateStr) {
@@ -114,16 +125,21 @@ function runChecks() {
       message: '.ai/instructions.md not found',
       hint: 'Ensure the project has a .ai/instructions.md with a skills index section.',
     });
-    report(errors, warnings, 0);
+    report(errors, warnings, { skills: 0, agents: 0, workflows: 0 }, null);
     return;
   }
 
-  const indexedPaths = readIndexedSkillPaths();
-  const diskPaths = discoverSkillFiles();
+  const raw = readFileSync(INSTRUCTIONS_PATH, 'utf8');
+  const instructionsFm = readFrontmatter(raw) || {};
+  const version = instructionsFm.boilerplate_version || null;
+  const content = stripHtmlComments(raw);
 
-  // Check 1: skill file on disk has no index entry
-  for (const diskPath of diskPaths) {
-    if (!indexedPaths.has(diskPath)) {
+  // ── Skills ─────────────────────────────────────────────────────────────────
+  const indexedSkillPaths = readIndexedSkillPaths(content);
+  const diskSkillPaths = discoverFilesByName(join(AI_DIR, 'skills'), 'SKILL.md');
+
+  for (const diskPath of diskSkillPaths) {
+    if (!indexedSkillPaths.has(diskPath)) {
       errors.push({
         code: 'missing-index',
         message: `${diskPath} exists but has no entry in .ai/instructions.md`,
@@ -132,8 +148,7 @@ function runChecks() {
     }
   }
 
-  // Check 2: index entry references a non-existent file
-  for (const indexedPath of indexedPaths) {
+  for (const indexedPath of indexedSkillPaths) {
     if (!existsSync(join(PROJECT_ROOT, indexedPath))) {
       errors.push({
         code: 'missing-file',
@@ -143,34 +158,111 @@ function runChecks() {
     }
   }
 
-  // Checks 3 & 4: frontmatter on every disk skill file
-  for (const diskPath of diskPaths) {
+  for (const diskPath of diskSkillPaths) {
     const abs = join(PROJECT_ROOT, diskPath);
-    const lastReviewed = parseFrontmatterField(abs, 'last_reviewed');
+    const fm = readFrontmatter(readFileSync(abs, 'utf8')) || {};
+    const lastReviewed = fm.last_reviewed;
 
-    if (lastReviewed === null) {
+    if (!lastReviewed) {
       errors.push({
         code: 'missing-frontmatter',
         message: `${diskPath} is missing the 'last_reviewed' frontmatter field`,
         hint: `Add: last_reviewed: ${new Date().toISOString().slice(0, 10)} to the frontmatter.`,
       });
-    } else {
-      const age = daysSince(lastReviewed);
-      if (age > STALE_THRESHOLD_DAYS) {
-        warnings.push({
-          code: 'stale-skill',
-          message: `${diskPath} last_reviewed ${lastReviewed} is ${age} days ago (threshold: ${STALE_THRESHOLD_DAYS})`,
-          hint: 'Review and update the skill, then set last_reviewed to today.',
-        });
-      }
+      continue;
+    }
+
+    if (!ISO_DATE_RE.test(lastReviewed) || isNaN(new Date(lastReviewed).getTime())) {
+      errors.push({
+        code: 'invalid-date',
+        message: `${diskPath} has invalid last_reviewed: '${lastReviewed}' (expected YYYY-MM-DD)`,
+        hint: `Use an ISO date, e.g. ${new Date().toISOString().slice(0, 10)}.`,
+      });
+      continue;
+    }
+
+    const age = daysSince(lastReviewed);
+    if (age > STALE_THRESHOLD_DAYS) {
+      warnings.push({
+        code: 'stale-skill',
+        message: `${diskPath} last_reviewed ${lastReviewed} is ${age} days ago (threshold: ${STALE_THRESHOLD_DAYS})`,
+        hint: 'Review and update the skill, then set last_reviewed to today.',
+      });
     }
   }
 
-  report(errors, warnings, diskPaths.length);
+  // ── Agents ─────────────────────────────────────────────────────────────────
+  const diskAgentPaths = discoverFilesByName(join(AI_DIR, 'agents'), 'AGENT.md');
+
+  for (const diskPath of diskAgentPaths) {
+    const abs = join(PROJECT_ROOT, diskPath);
+    const fm = readFrontmatter(readFileSync(abs, 'utf8'));
+
+    if (!fm) {
+      errors.push({
+        code: 'agent-missing-frontmatter',
+        message: `${diskPath} has no frontmatter block`,
+        hint: 'Add a YAML frontmatter block with name and description fields.',
+      });
+      continue;
+    }
+    if (!fm.name) {
+      errors.push({
+        code: 'agent-missing-field',
+        message: `${diskPath} frontmatter is missing 'name'`,
+        hint: 'Add: name: <agent-name> to the frontmatter.',
+      });
+    }
+    if (!fm.description) {
+      errors.push({
+        code: 'agent-missing-field',
+        message: `${diskPath} frontmatter is missing 'description'`,
+        hint: 'Add a short description so the agent knows when to run.',
+      });
+    }
+  }
+
+  // ── Workflows ──────────────────────────────────────────────────────────────
+  const indexedWorkflowPaths = readIndexedWorkflowPaths(content);
+  const diskWorkflowPaths = discoverFilesByName(join(AI_DIR, 'workflow'), 'guide.md');
+
+  for (const diskPath of diskWorkflowPaths) {
+    if (!indexedWorkflowPaths.has(diskPath)) {
+      errors.push({
+        code: 'workflow-missing-index',
+        message: `${diskPath} exists but has no entry in .ai/instructions.md`,
+        hint: 'Add a row under "Workflow guides" in .ai/instructions.md',
+      });
+    }
+  }
+
+  for (const indexedPath of indexedWorkflowPaths) {
+    if (!existsSync(join(PROJECT_ROOT, indexedPath))) {
+      errors.push({
+        code: 'workflow-missing-file',
+        message: `.ai/instructions.md indexes ${indexedPath} but the file does not exist`,
+        hint: 'Create the workflow guide or remove the dead index entry.',
+      });
+    }
+  }
+
+  report(
+    errors,
+    warnings,
+    {
+      skills: diskSkillPaths.length,
+      agents: diskAgentPaths.length,
+      workflows: diskWorkflowPaths.length,
+    },
+    version
+  );
 }
 
-function report(errors, warnings, skillCount) {
+function report(errors, warnings, counts, version) {
   console.log('[ai-config] Validating .ai/ configuration...\n');
+  if (version) {
+    console.log(`[ai-config] Initialized from boilerplate v${version}\n`);
+  }
 
   if (errors.length > 0) {
     console.log('ERRORS (block commit):');
@@ -190,10 +282,10 @@ function report(errors, warnings, skillCount) {
     console.log('');
   }
 
+  const summary = `${counts.skills} skill(s), ${counts.agents} agent(s), ${counts.workflows} workflow(s) checked`;
+
   if (errors.length === 0 && warnings.length === 0) {
-    console.log(
-      `[ai-config] Validation passed — ${skillCount} skill(s) checked, 0 error(s), 0 warning(s).`
-    );
+    console.log(`[ai-config] Validation passed — ${summary}, 0 error(s), 0 warning(s).`);
     process.exit(0);
   }
 
@@ -205,7 +297,7 @@ function report(errors, warnings, skillCount) {
   }
 
   console.log(
-    `[ai-config] Validation passed with ${warnings.length} warning(s). No blocking errors.`
+    `[ai-config] Validation passed with ${warnings.length} warning(s). ${summary}. No blocking errors.`
   );
   process.exit(0);
 }

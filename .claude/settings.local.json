@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node .ai/scripts/validate-config.mjs)",
+      "Bash(echo \"---EXIT: $?---\")",
+      "Bash(node -e ' *)",
+      "Bash(node *)",
+      "Bash(cp .ai/skills/_example/SKILL.md /tmp/SKILL.md.bak)",
+      "Bash(cp /tmp/SKILL.md.bak .ai/skills/_example/SKILL.md)"
+    ]
+  }
+}

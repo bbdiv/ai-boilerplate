@@ -15,6 +15,7 @@ This document captures the key decisions made when designing this AI config stru
 |---|---|
 | `CLAUDE.md` | Claude Code |
 | `AGENTS.md` | Google Antigravity + cross-tool fallback |
+| `GEMINI.md` | Gemini CLI |
 | `.cursor/rules/project.mdc` | Cursor |
 | `.windsurfrules` | Windsurf |
 | `.github/copilot-instructions.md` | GitHub Copilot |
