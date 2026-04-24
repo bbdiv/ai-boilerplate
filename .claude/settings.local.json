@@ -6,7 +6,11 @@
       "Bash(node -e ' *)",
       "Bash(node *)",
       "Bash(cp .ai/skills/_example/SKILL.md /tmp/SKILL.md.bak)",
-      "Bash(cp /tmp/SKILL.md.bak .ai/skills/_example/SKILL.md)"
+      "Bash(cp /tmp/SKILL.md.bak .ai/skills/_example/SKILL.md)",
+      "Bash(cp \"C:/Users/bb/Documents/autodoc/ai boilerplate/boilerplate/.ai/skills/import-order/SKILL.md\" /tmp/fake-local.md)",
+      "Bash(mkdir -p \"C:/Users/bb/Documents/autodoc/ai boilerplate/boilerplate/.ai/skills/team-local\")",
+      "Bash(cp /tmp/fake-local.md \"C:/Users/bb/Documents/autodoc/ai boilerplate/boilerplate/.ai/skills/team-local/SKILL.md\")",
+      "Bash(sed -i 's/name: import-order/name: team-local/' \"C:/Users/bb/Documents/autodoc/ai boilerplate/boilerplate/.ai/skills/team-local/SKILL.md\")"
     ]
   }
 }

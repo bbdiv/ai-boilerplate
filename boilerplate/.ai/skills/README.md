@@ -37,6 +37,17 @@ Step-by-step instructions...
 
 > **`last_reviewed` is required.** Update it whenever you verify the skill still reflects current conventions. A skill that hasn't been reviewed after a major refactor is a liability — it gives the agent wrong guidance silently.
 
+### Optional: `source: boilerplate` marker
+
+Skills copied verbatim from the upstream boilerplate also carry two extra frontmatter fields:
+
+```yaml
+source: boilerplate
+source_version: 1.4.0
+```
+
+These identify the skill as sync-tracked with the upstream and record which version the content came from. **Don't add them to project-local skills** — the absence of the marker is what signals "this is ours, don't touch on upstream bumps." If you heavily edit a sourced skill, remove the `source` field to claim it as local.
+
 ## Definition of done for a skill
 
 A skill is only "done" when:

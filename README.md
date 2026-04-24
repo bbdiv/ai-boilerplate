@@ -1,6 +1,6 @@
 # AI Config Boilerplate
 
-**Version: 1.2.0** — last updated 2026-04-22
+**Version: 1.5.0** — last updated 2026-04-24
 
 A ready-to-copy template for wiring up a consistent AI configuration across any project — regardless of which tool your team uses.
 
@@ -35,15 +35,23 @@ The knowledge lives in one place. Every tool reads it.
     ├── scripts/
     │   └── validate-config.mjs      # Validation script — checks skills index integrity
     ├── skills/
-    │   └── README.md                # What skills are and how to write them
+    │   ├── README.md                # What skills are and how to write them
+    │   ├── import-order/SKILL.md    # Generic: import grouping + ordering
+    │   └── translations-typed-i18n/SKILL.md  # Generic: typed i18n key management
     ├── workflow/
-    │   └── README.md                # What workflow guides are and how to write them
+    │   ├── README.md                # What workflow guides are and how to write them
+    │   └── build-feature/guide.md   # Generic: end-to-end feature workflow
     ├── agents/
     │   ├── README.md                # What agents are and how to define them
     │   ├── pr-review/AGENT.md       # Reviews PRs against project conventions
     │   └── ai-config-audit/AGENT.md # Audits skills for staleness and semantic drift
     └── context/
-        └── README.md                # What reference docs go here and why
+        ├── README.md                        # What reference docs go here and why
+        └── react-performance/               # Vercel's React perf skill (MIT, verbatim)
+            ├── SKILL.md                     # Index of 65 rules by category
+            ├── AGENTS.md                    # Full compiled guide (one file)
+            ├── README.md                    # Vercel's own README
+            └── rules/                       # 65 individual rule files
 ```
 
 ### Entry points
@@ -175,6 +183,30 @@ Each project initialized from this boilerplate is a snapshot. When the boilerpla
 **Long-term:** move this boilerplate to a dedicated git repository. Projects can then pull updates on demand rather than relying on manual sync.
 
 ## Changelog
+
+### 1.5.0 — 2026-04-24
+- Shipped the full Vercel React Best Practices bundle under `.ai/context/react-performance/` — previously only the category index was copied. Now includes:
+  - `SKILL.md` — the 65-rule index (Vercel's entry point).
+  - `AGENTS.md` — Vercel's compiled full guide.
+  - `README.md` — Vercel's own README covering rule structure and tooling.
+  - `rules/` — 65 individual rule files (plus `_sections.md` + `_template.md`).
+- Agents can now load a specific rule on demand (e.g. `rules/bundle-barrel-imports.md`) instead of being stuck with just the index. All content is MIT-licensed and attributed to Vercel in the original frontmatter.
+- `source: boilerplate` + `source_version: 1.5.0` marker added to `SKILL.md` (treated as the entry point of the bundled artifact — update the whole folder together on upstream bumps).
+- `build-feature/guide.md` updated to point at the bundle's `SKILL.md` and `rules/` instead of the removed `index.md`.
+
+### 1.4.0 — 2026-04-23
+- Added `source: boilerplate` + `source_version: <version>` frontmatter markers on every file shipped by the boilerplate (skills, agents, workflow guides, context docs). Purpose: on an upstream bump, teams can grep/filter for sourced files and decide what to replace without touching project-local additions.
+- Extended `validate-config.mjs` to print a "Boilerplate-sourced files" inventory at the end of its report.
+- Convention: project-local files (team-written skills/agents/workflows) **omit** the `source` field. Only files intended to stay in sync with the upstream carry it.
+
+### 1.3.0 — 2026-04-22
+- Shipped first batch of generic skills (realizing the "future intent" noted in `DECISIONS.md` #9):
+  - `.ai/skills/import-order/SKILL.md` — 5-group import ordering rule.
+  - `.ai/skills/translations-typed-i18n/SKILL.md` — typed i18n key management pattern.
+  - `.ai/workflow/build-feature/guide.md` — end-to-end feature workflow (models → API → queries → forms → UI → i18n → verify).
+  - `.ai/context/react-performance/index.md` — Vercel's React performance rules index (MIT-licensed, credited).
+- Removed `.ai/skills/_example/` — replaced by the real skills above, which now serve as the copy-and-adapt starting point.
+- Updated `.ai/instructions.md` with real index entries for the new skills and workflow; left a commented list of stack-specific skills teams commonly add on top (queries, mutations, forms, components, models, icons).
 
 ### 1.2.0 — 2026-04-22
 - Added `GEMINI.md` entry point for Gemini CLI.

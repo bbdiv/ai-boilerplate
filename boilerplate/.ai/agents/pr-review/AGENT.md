@@ -3,6 +3,8 @@ name: pr-review
 description: >-
   Reviews a pull request against project conventions. Use when asked to review
   a PR, check a diff, or validate that changes follow project standards.
+source: boilerplate
+source_version: 1.4.0
 ---
 
 # Agent: PR Reviewer

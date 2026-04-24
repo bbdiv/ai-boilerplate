@@ -1,5 +1,5 @@
 ---
-boilerplate_version: 1.2.0
+boilerplate_version: 1.5.0
 ---
 
 # Project operating manual — {{project-name}}
@@ -53,34 +53,34 @@ boilerplate_version: 1.2.0
 
 ## Skills index
 
-| Task type                         | Skill                                  |
-|-----------------------------------|----------------------------------------|
-| Reference: how to write a skill   | `.ai/skills/_example/SKILL.md`         |
+| Task type                                   | Skill                                                |
+|---------------------------------------------|------------------------------------------------------|
+| Any file with imports                       | `.ai/skills/import-order/SKILL.md`                   |
+| Adding/editing i18n keys                    | `.ai/skills/translations-typed-i18n/SKILL.md`        |
 
 <!--
-  Add rows above as you create skills. Keep descriptions short — agents
-  scan this table to decide whether to load a skill. Delete the `_example`
-  row once you've written your first real skill.
+  Add rows above as you create more skills. Keep descriptions short —
+  agents scan this table to decide whether to load a skill.
 
-  Fuller example of what a mature index looks like:
+  Recommended skills to add when the stack calls for them (not shipped
+  generically because they're framework/library-specific):
 
   | Task type                        | Skill                                          |
   |----------------------------------|------------------------------------------------|
-  | Any multi-layer feature/change   | `.ai/skills/SKILL.md`                          |
-  | Data fetching                    | `.ai/skills/query/queries/SKILL.md`            |
-  | Write operations / mutations     | `.ai/skills/query/mutations/SKILL.md`          |
+  | Data fetching (queries)          | `.ai/skills/query/queries/SKILL.md`            |
+  | Write operations (mutations)     | `.ai/skills/query/mutations/SKILL.md`          |
   | Forms                            | `.ai/skills/forms/SKILL.md`                    |
   | New components                   | `.ai/skills/create-components/SKILL.md`        |
   | TypeScript models/types          | `.ai/skills/models/SKILL.md`                   |
-  | Import ordering                  | `.ai/skills/import-order/SKILL.md`             |
-  | Translations / i18n              | `.ai/skills/translations/SKILL.md`             |
+  | Icons                            | `.ai/skills/icons/SKILL.md`                    |
 -->
 
 ## Workflow guides
 
+- Any multi-layer feature / change: `.ai/workflow/build-feature/guide.md`
+
 <!--
-  List higher-level feature workflow guides.
-  Example:
+  Additional workflow guides teams commonly add on top of the generic one:
 
   - New list view:        `.ai/workflow/create-list-view/guide.md`
   - New detail/edit view: `.ai/workflow/create-detail-edit-view/guide.md`

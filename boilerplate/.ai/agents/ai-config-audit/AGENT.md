@@ -3,6 +3,8 @@ name: ai-config-audit
 description: >-
   Audits the .ai/ config for stale skills and semantic drift after refactors.
   Use when onboarding, after a major refactor, or when skills may be out of date.
+source: boilerplate
+source_version: 1.4.0
 ---
 
 # Agent: AI Config Auditor
