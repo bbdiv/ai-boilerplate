@@ -81,6 +81,8 @@ Each file is a thin stub — it identifies the project, lists the `.ai/` folder 
 
 ## How to use
 
+> **Want to skip the manual steps?** Hand off this whole workflow to an AI session using [`APPLY_PROMPT.md`](APPLY_PROMPT.md) — a reusable prompt that copies the boilerplate into a target repo, replaces placeholders, wires husky, and runs the validator. Useful for onboarding a new repo without remembering the steps below.
+
 ### 1. Copy into your project root
 
 ```bash

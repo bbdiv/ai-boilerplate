@@ -1,11 +1,13 @@
 # Reusable prompt — apply this boilerplate to a repo
 
 Paste the block below into a fresh Claude / Cursor / etc. session, then fill in
-the two placeholders at the top: `<TARGET_REPO_PATH>` and `<TARGET_BRANCH>`.
+the three placeholders at the top: `<BOILERPLATE_PATH>`, `<TARGET_REPO_PATH>`,
+and `<TARGET_BRANCH>`.
 
 The prompt assumes:
-- This boilerplate lives at `C:/Users/bb/Documents/autodoc/ai boilerplate/boilerplate/`.
-  If you've moved it (e.g. cloned a public repo), adjust `<BOILERPLATE_PATH>`.
+- `<BOILERPLATE_PATH>` points at the `boilerplate/` subfolder of this repo
+  on the machine running the session (e.g.
+  `/path/to/ai-boilerplate/boilerplate`).
 - The target repo already has a `package.json` (so we know how to wire the husky
   scripts).
 
@@ -16,7 +18,7 @@ You are going to apply our shared AI-config boilerplate to a repo. Be careful,
 don't commit anything — just make the file changes and run the validator.
 
 Inputs:
-- BOILERPLATE_PATH:  C:/Users/bb/Documents/autodoc/ai boilerplate/boilerplate
+- BOILERPLATE_PATH:  <BOILERPLATE_PATH>        # path to the boilerplate/ folder of this repo
 - TARGET_REPO_PATH:  <TARGET_REPO_PATH>
 - TARGET_BRANCH:     <TARGET_BRANCH>           # usually develop
 - PROJECT_NAME:      <leave blank to use the folder name>
