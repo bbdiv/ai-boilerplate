@@ -1,6 +1,6 @@
 # AI Config Boilerplate
 
-**Version: 1.5.0** — last updated 2026-04-24
+**Version: 1.6.0** — last updated 2026-04-30
 
 A ready-to-copy template for wiring up a consistent AI configuration across any project — regardless of which tool your team uses.
 
@@ -183,6 +183,12 @@ Each project initialized from this boilerplate is a snapshot. When the boilerpla
 **Long-term:** move this boilerplate to a dedicated git repository. Projects can then pull updates on demand rather than relying on manual sync.
 
 ## Changelog
+
+### 1.6.0 — 2026-04-30
+- Added `.ai/skills/write-a-skill/SKILL.md` — meta-skill that walks an agent through authoring a new skill (gather → draft → index → review). Complements `.ai/skills/README.md`: README is the static format spec for humans browsing the folder; the new skill is the prescriptive, agent-loadable process.
+- Indexed in `.ai/instructions.md` so agents pick it up when the user asks to "create a skill" or "scaffold a skill".
+- Slimmed `.ai/skills/README.md`: removed prescriptive "Tips for writing good skills" section (now lives in `write-a-skill/SKILL.md` as the description-writing guide and split-files heuristics). README now sits as static reference (what is a skill, format, done checklist, example structure) and points to the skill for the authoring process.
+- Marked `source: boilerplate` + `source_version: 1.6.0` for upstream sync tracking.
 
 ### 1.5.0 — 2026-04-24
 - Shipped the full Vercel React Best Practices bundle under `.ai/context/react-performance/` — previously only the category index was copied. Now includes:

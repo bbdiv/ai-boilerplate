@@ -1,5 +1,5 @@
 ---
-boilerplate_version: 1.5.0
+boilerplate_version: 1.6.0
 ---
 
 # Project operating manual — {{project-name}}
@@ -57,6 +57,7 @@ boilerplate_version: 1.5.0
 |---------------------------------------------|------------------------------------------------------|
 | Any file with imports                       | `.ai/skills/import-order/SKILL.md`                   |
 | Adding/editing i18n keys                    | `.ai/skills/translations-typed-i18n/SKILL.md`        |
+| Authoring a new skill                       | `.ai/skills/write-a-skill/SKILL.md`                  |
 
 <!--
   Add rows above as you create more skills. Keep descriptions short —
