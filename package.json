@@ -1,0 +1,10 @@
+{
+  "name": "ai-boilerplate",
+  "version": "1.7.0",
+  "private": true,
+  "type": "module",
+  "description": "AI config boilerplate — template + maintainer scripts for syncing across consumer repos.",
+  "scripts": {
+    "drift": "node scripts/check-drift.mjs"
+  }
+}

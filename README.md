@@ -182,9 +182,17 @@ pnpm validate:ai-config
 
 Each project initialized from this boilerplate is a snapshot. When the boilerplate improves, existing projects won't automatically get the update.
 
-**Short-term:** track which version a project was initialized from (e.g. in a comment at the top of `CLAUDE.md`). When the boilerplate bumps a version, check the changelog and manually apply relevant changes.
+**Tooling:**
 
-**Long-term:** move this boilerplate to a dedicated git repository. Projects can then pull updates on demand rather than relying on manual sync.
+- `consumers.json` at the repo root lists every consumer with stack tags, instructions-index format, and per-repo opt-outs (`skip`).
+- `pnpm drift` (or `node scripts/check-drift.mjs`) walks every consumer and reports each sourced file as `ok` / `skipped` / `missing` / `behind` / `edited` / `ahead` / `detached`. Read-only.
+- [`MAINTAINING.md`](MAINTAINING.md) is the maintainer runbook for shipping a change end-to-end (drift → branch `chore/ai-boilerplate` → copy → bump version + index row → validate → commit → push). Read it before each propagation.
+
+**Conventions:**
+
+- Standing branch on every consumer for syncs is `chore/ai-boilerplate`.
+- `skip` is a contract: a consumer that intentionally doesn't carry a sourced file must declare it. "Missing" is never silent.
+- A consumer that forks a sourced file must remove the `source: boilerplate` marker AND add the path to `skip`, so drift stops flagging it.
 
 ## Changelog
 
