@@ -1,5 +1,5 @@
 ---
-boilerplate_version: 1.7.0
+boilerplate_version: 1.8.0
 ---
 
 # Project operating manual — {{project-name}}
@@ -59,6 +59,7 @@ boilerplate_version: 1.7.0
 | Adding/editing i18n keys                    | `.ai/skills/translations-typed-i18n/SKILL.md`        |
 | Authoring a new skill                       | `.ai/skills/write-a-skill/SKILL.md`                  |
 | Stress-testing a plan before implementation | `.ai/skills/grill-me/SKILL.md`                       |
+| Writing a git commit message                | `.ai/skills/commit-messages/SKILL.md`                |
 
 <!--
   Add rows above as you create more skills. Keep descriptions short —
