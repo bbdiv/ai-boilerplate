@@ -1,6 +1,6 @@
 # AI Config Boilerplate
 
-**Version: 1.6.0** — last updated 2026-04-30
+**Version: 1.7.0** — last updated 2026-05-04
 
 A ready-to-copy template for wiring up a consistent AI configuration across any project — regardless of which tool your team uses.
 
@@ -37,7 +37,9 @@ The knowledge lives in one place. Every tool reads it.
     ├── skills/
     │   ├── README.md                # What skills are and how to write them
     │   ├── import-order/SKILL.md    # Generic: import grouping + ordering
-    │   └── translations-typed-i18n/SKILL.md  # Generic: typed i18n key management
+    │   ├── translations-typed-i18n/SKILL.md  # Generic: typed i18n key management
+    │   ├── write-a-skill/SKILL.md   # Meta: how to author a new skill
+    │   └── grill-me/SKILL.md        # Process: stress-test a plan before coding
     ├── workflow/
     │   ├── README.md                # What workflow guides are and how to write them
     │   └── build-feature/guide.md   # Generic: end-to-end feature workflow
@@ -185,6 +187,12 @@ Each project initialized from this boilerplate is a snapshot. When the boilerpla
 **Long-term:** move this boilerplate to a dedicated git repository. Projects can then pull updates on demand rather than relying on manual sync.
 
 ## Changelog
+
+### 1.7.0 — 2026-05-04
+- Added `.ai/skills/grill-me/SKILL.md` — process skill for stress-testing a plan or design before implementation. Walk the decision tree one question at a time, recommend an answer per question, prefer reading the codebase over asking when the answer is derivable. Adapted from Matt Pocock's `grill-me` skill (`github.com/mattpocock/skills`).
+- Indexed in `.ai/instructions.md` so agents pick it up on triggers like "grill me" or when a non-trivial feature has open decisions.
+- Linked from `.ai/workflow/build-feature/guide.md` step 1 as an optional pre-step when scope/data shape/edge cases are not yet aligned.
+- Marked `source: boilerplate` + `source_version: 1.7.0` for upstream sync tracking.
 
 ### 1.6.0 — 2026-04-30
 - Added `.ai/skills/write-a-skill/SKILL.md` — meta-skill that walks an agent through authoring a new skill (gather → draft → index → review). Complements `.ai/skills/README.md`: README is the static format spec for humans browsing the folder; the new skill is the prescriptive, agent-loadable process.

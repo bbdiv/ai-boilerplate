@@ -13,6 +13,8 @@ Use this when adding functionality that touches multiple layers (data shape, API
 
 Read the relevant existing code. Check what already exists — models, API functions, query/mutation hooks, components, translations. Reuse before inventing.
 
+If the plan still has open decisions (scope, data shape, edge cases, integration points), grill it first — see `.ai/skills/grill-me/SKILL.md`.
+
 ### 2. Models first
 
 Define or update the TypeScript types and interfaces the feature needs. Models are pure data shapes — no logic.
