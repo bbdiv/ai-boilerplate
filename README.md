@@ -1,6 +1,6 @@
 # AI Config Boilerplate
 
-**Version: 1.7.0** — last updated 2026-05-04
+**Version: 1.8.0** — last updated 2026-05-04
 
 A ready-to-copy template for wiring up a consistent AI configuration across any project — regardless of which tool your team uses.
 
@@ -39,7 +39,8 @@ The knowledge lives in one place. Every tool reads it.
     │   ├── import-order/SKILL.md    # Generic: import grouping + ordering
     │   ├── translations-typed-i18n/SKILL.md  # Generic: typed i18n key management
     │   ├── write-a-skill/SKILL.md   # Meta: how to author a new skill
-    │   └── grill-me/SKILL.md        # Process: stress-test a plan before coding
+    │   ├── grill-me/SKILL.md        # Process: stress-test a plan before coding
+    │   └── commit-messages/SKILL.md # Generic: Conventional Commits format
     ├── workflow/
     │   ├── README.md                # What workflow guides are and how to write them
     │   └── build-feature/guide.md   # Generic: end-to-end feature workflow
@@ -182,11 +183,24 @@ pnpm validate:ai-config
 
 Each project initialized from this boilerplate is a snapshot. When the boilerplate improves, existing projects won't automatically get the update.
 
-**Short-term:** track which version a project was initialized from (e.g. in a comment at the top of `CLAUDE.md`). When the boilerplate bumps a version, check the changelog and manually apply relevant changes.
+**Tooling:**
 
-**Long-term:** move this boilerplate to a dedicated git repository. Projects can then pull updates on demand rather than relying on manual sync.
+- `consumers.json` at the repo root lists every consumer with stack tags, instructions-index format, and per-repo opt-outs (`skip`).
+- `pnpm drift` (or `node scripts/check-drift.mjs`) walks every consumer and reports each sourced file as `ok` / `skipped` / `missing` / `behind` / `edited` / `ahead` / `detached`. Read-only.
+- [`MAINTAINING.md`](MAINTAINING.md) is the maintainer runbook for shipping a change end-to-end (drift → branch `chore/ai-boilerplate` → copy → bump version + index row → validate → commit → push). Read it before each propagation.
+
+**Conventions:**
+
+- Standing branch on every consumer for syncs is `chore/ai-boilerplate`.
+- `skip` is a contract: a consumer that intentionally doesn't carry a sourced file must declare it. "Missing" is never silent.
+- A consumer that forks a sourced file must remove the `source: boilerplate` marker AND add the path to `skip`, so drift stops flagging it.
 
 ## Changelog
+
+### 1.8.0 — 2026-05-04
+- Added `.ai/skills/commit-messages/SKILL.md` — Conventional Commits format reference (type list, subject rules, examples, anti-patterns, project-specific scopes).
+- Indexed in `.ai/instructions.md` so agents pick it up when authoring any commit.
+- Marked `source: boilerplate` + `source_version: 1.8.0` for upstream sync tracking.
 
 ### 1.7.0 — 2026-05-04
 - Added `.ai/skills/grill-me/SKILL.md` — process skill for stress-testing a plan or design before implementation. Walk the decision tree one question at a time, recommend an answer per question, prefer reading the codebase over asking when the answer is derivable. Adapted from Matt Pocock's `grill-me` skill (`github.com/mattpocock/skills`).
