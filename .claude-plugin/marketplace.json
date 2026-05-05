@@ -1,0 +1,13 @@
+{
+  "name": "autodoc",
+  "owner": {
+    "name": "Autodoc Engineering"
+  },
+  "plugins": [
+    {
+      "name": "autodoc-ai",
+      "source": "./plugins/autodoc-ai",
+      "description": "Autodoc engineering skills for Claude Code: commit conventions, planning, skill authoring, import order, typed i18n."
+    }
+  ]
+}
