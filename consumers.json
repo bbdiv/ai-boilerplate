@@ -1,0 +1,80 @@
+{
+  "$schema-comment": "Consumer registry — repos initialized from this boilerplate. Used by scripts/check-drift.mjs and (eventually) a propagate-changes skill to walk repos consistently when syncing upstream changes. `path` is relative to this file. `stack` tags gate which sourced artifacts apply (e.g. `no-react` repos skip the React-performance bundle). `instructions_format` records the layout of each repo's `.ai/instructions.md` skills index so edits target the right shape. `skip` is a list of path prefixes (relative to `.ai/`) that the consumer intentionally does NOT carry — drift-check ignores them.",
+  "consumers": [
+    {
+      "name": "autodoc-ui",
+      "path": "../autodoc-ui",
+      "stack": ["react", "ui-lib"],
+      "instructions_format": "table-wide",
+      "skip": [
+        "skills/import-order",
+        "skills/translations-typed-i18n",
+        "workflow/build-feature"
+      ],
+      "notes": "UI lib, not a feature app. Has its own skills (component-example-workflow, css-slot-pattern). No app-level i18n, no feature workflow."
+    },
+    {
+      "name": "mf-login",
+      "path": "../mf-login",
+      "stack": ["react"],
+      "instructions_format": "table-narrow",
+      "skip": []
+    },
+    {
+      "name": "mf-platform-utility-module",
+      "path": "../mf-platform-utility-module",
+      "stack": ["no-react"],
+      "instructions_format": "table-narrow",
+      "skip": [
+        "context/react-performance",
+        "skills/translations-typed-i18n",
+        "workflow/build-feature"
+      ],
+      "notes": "Utility module — no React, no i18n, no feature workflow."
+    },
+    {
+      "name": "mf-projetos",
+      "path": "../mf-projetos",
+      "stack": ["react"],
+      "instructions_format": "table-narrow",
+      "skip": []
+    },
+    {
+      "name": "mf-rdo",
+      "path": "../mf-rdo",
+      "stack": ["react"],
+      "instructions_format": "table-narrow",
+      "skip": []
+    },
+    {
+      "name": "mf-root-config",
+      "path": "../mf-root-config",
+      "stack": ["no-react"],
+      "instructions_format": "table-narrow",
+      "skip": [
+        "context/react-performance",
+        "skills/translations-typed-i18n",
+        "workflow/build-feature"
+      ],
+      "notes": "single-spa root config — no React, no i18n, no feature workflow."
+    },
+    {
+      "name": "mf-suite",
+      "path": "../mf-suite",
+      "stack": ["react"],
+      "instructions_format": "table-narrow",
+      "skip": []
+    },
+    {
+      "name": "mf-workforce",
+      "path": "../mf-workforce",
+      "stack": ["react"],
+      "instructions_format": "bullet",
+      "skip": [
+        "skills/import-order",
+        "skills/translations-typed-i18n"
+      ],
+      "notes": "Has local replacements: own translations/ skill, own forked import-order. Owns these — do not propagate."
+    }
+  ]
+}

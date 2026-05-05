@@ -1,6 +1,6 @@
 # AI Config Boilerplate
 
-**Version: 1.2.0** — last updated 2026-04-22
+**Version: 1.8.0** — last updated 2026-05-04
 
 A ready-to-copy template for wiring up a consistent AI configuration across any project — regardless of which tool your team uses.
 
@@ -35,15 +35,26 @@ The knowledge lives in one place. Every tool reads it.
     ├── scripts/
     │   └── validate-config.mjs      # Validation script — checks skills index integrity
     ├── skills/
-    │   └── README.md                # What skills are and how to write them
+    │   ├── README.md                # What skills are and how to write them
+    │   ├── import-order/SKILL.md    # Generic: import grouping + ordering
+    │   ├── translations-typed-i18n/SKILL.md  # Generic: typed i18n key management
+    │   ├── write-a-skill/SKILL.md   # Meta: how to author a new skill
+    │   ├── grill-me/SKILL.md        # Process: stress-test a plan before coding
+    │   └── commit-messages/SKILL.md # Generic: Conventional Commits format
     ├── workflow/
-    │   └── README.md                # What workflow guides are and how to write them
+    │   ├── README.md                # What workflow guides are and how to write them
+    │   └── build-feature/guide.md   # Generic: end-to-end feature workflow
     ├── agents/
     │   ├── README.md                # What agents are and how to define them
     │   ├── pr-review/AGENT.md       # Reviews PRs against project conventions
     │   └── ai-config-audit/AGENT.md # Audits skills for staleness and semantic drift
     └── context/
-        └── README.md                # What reference docs go here and why
+        ├── README.md                        # What reference docs go here and why
+        └── react-performance/               # Vercel's React perf skill (MIT, verbatim)
+            ├── SKILL.md                     # Index of 65 rules by category
+            ├── AGENTS.md                    # Full compiled guide (one file)
+            ├── README.md                    # Vercel's own README
+            └── rules/                       # 65 individual rule files
 ```
 
 ### Entry points
@@ -72,6 +83,8 @@ Each file is a thin stub — it identifies the project, lists the `.ai/` folder 
 ---
 
 ## How to use
+
+> **Want to skip the manual steps?** Hand off this whole workflow to an AI session using [`APPLY_PROMPT.md`](APPLY_PROMPT.md) — a reusable prompt that copies the boilerplate into a target repo, replaces placeholders, wires husky, and runs the validator. Useful for onboarding a new repo without remembering the steps below.
 
 ### 1. Copy into your project root
 
@@ -170,11 +183,60 @@ pnpm validate:ai-config
 
 Each project initialized from this boilerplate is a snapshot. When the boilerplate improves, existing projects won't automatically get the update.
 
-**Short-term:** track which version a project was initialized from (e.g. in a comment at the top of `CLAUDE.md`). When the boilerplate bumps a version, check the changelog and manually apply relevant changes.
+**Tooling:**
 
-**Long-term:** move this boilerplate to a dedicated git repository. Projects can then pull updates on demand rather than relying on manual sync.
+- `consumers.json` at the repo root lists every consumer with stack tags, instructions-index format, and per-repo opt-outs (`skip`).
+- `pnpm drift` (or `node scripts/check-drift.mjs`) walks every consumer and reports each sourced file as `ok` / `skipped` / `missing` / `behind` / `edited` / `ahead` / `detached`. Read-only.
+- [`MAINTAINING.md`](MAINTAINING.md) is the maintainer runbook for shipping a change end-to-end (drift → branch `chore/ai-boilerplate` → copy → bump version + index row → validate → commit → push). Read it before each propagation.
+
+**Conventions:**
+
+- Standing branch on every consumer for syncs is `chore/ai-boilerplate`.
+- `skip` is a contract: a consumer that intentionally doesn't carry a sourced file must declare it. "Missing" is never silent.
+- A consumer that forks a sourced file must remove the `source: boilerplate` marker AND add the path to `skip`, so drift stops flagging it.
 
 ## Changelog
+
+### 1.8.0 — 2026-05-04
+- Added `.ai/skills/commit-messages/SKILL.md` — Conventional Commits format reference (type list, subject rules, examples, anti-patterns, project-specific scopes).
+- Indexed in `.ai/instructions.md` so agents pick it up when authoring any commit.
+- Marked `source: boilerplate` + `source_version: 1.8.0` for upstream sync tracking.
+
+### 1.7.0 — 2026-05-04
+- Added `.ai/skills/grill-me/SKILL.md` — process skill for stress-testing a plan or design before implementation. Walk the decision tree one question at a time, recommend an answer per question, prefer reading the codebase over asking when the answer is derivable. Adapted from Matt Pocock's `grill-me` skill (`github.com/mattpocock/skills`).
+- Indexed in `.ai/instructions.md` so agents pick it up on triggers like "grill me" or when a non-trivial feature has open decisions.
+- Linked from `.ai/workflow/build-feature/guide.md` step 1 as an optional pre-step when scope/data shape/edge cases are not yet aligned.
+- Marked `source: boilerplate` + `source_version: 1.7.0` for upstream sync tracking.
+
+### 1.6.0 — 2026-04-30
+- Added `.ai/skills/write-a-skill/SKILL.md` — meta-skill that walks an agent through authoring a new skill (gather → draft → index → review). Complements `.ai/skills/README.md`: README is the static format spec for humans browsing the folder; the new skill is the prescriptive, agent-loadable process.
+- Indexed in `.ai/instructions.md` so agents pick it up when the user asks to "create a skill" or "scaffold a skill".
+- Slimmed `.ai/skills/README.md`: removed prescriptive "Tips for writing good skills" section (now lives in `write-a-skill/SKILL.md` as the description-writing guide and split-files heuristics). README now sits as static reference (what is a skill, format, done checklist, example structure) and points to the skill for the authoring process.
+- Marked `source: boilerplate` + `source_version: 1.6.0` for upstream sync tracking.
+
+### 1.5.0 — 2026-04-24
+- Shipped the full Vercel React Best Practices bundle under `.ai/context/react-performance/` — previously only the category index was copied. Now includes:
+  - `SKILL.md` — the 65-rule index (Vercel's entry point).
+  - `AGENTS.md` — Vercel's compiled full guide.
+  - `README.md` — Vercel's own README covering rule structure and tooling.
+  - `rules/` — 65 individual rule files (plus `_sections.md` + `_template.md`).
+- Agents can now load a specific rule on demand (e.g. `rules/bundle-barrel-imports.md`) instead of being stuck with just the index. All content is MIT-licensed and attributed to Vercel in the original frontmatter.
+- `source: boilerplate` + `source_version: 1.5.0` marker added to `SKILL.md` (treated as the entry point of the bundled artifact — update the whole folder together on upstream bumps).
+- `build-feature/guide.md` updated to point at the bundle's `SKILL.md` and `rules/` instead of the removed `index.md`.
+
+### 1.4.0 — 2026-04-23
+- Added `source: boilerplate` + `source_version: <version>` frontmatter markers on every file shipped by the boilerplate (skills, agents, workflow guides, context docs). Purpose: on an upstream bump, teams can grep/filter for sourced files and decide what to replace without touching project-local additions.
+- Extended `validate-config.mjs` to print a "Boilerplate-sourced files" inventory at the end of its report.
+- Convention: project-local files (team-written skills/agents/workflows) **omit** the `source` field. Only files intended to stay in sync with the upstream carry it.
+
+### 1.3.0 — 2026-04-22
+- Shipped first batch of generic skills (realizing the "future intent" noted in `DECISIONS.md` #9):
+  - `.ai/skills/import-order/SKILL.md` — 5-group import ordering rule.
+  - `.ai/skills/translations-typed-i18n/SKILL.md` — typed i18n key management pattern.
+  - `.ai/workflow/build-feature/guide.md` — end-to-end feature workflow (models → API → queries → forms → UI → i18n → verify).
+  - `.ai/context/react-performance/index.md` — Vercel's React performance rules index (MIT-licensed, credited).
+- Removed `.ai/skills/_example/` — replaced by the real skills above, which now serve as the copy-and-adapt starting point.
+- Updated `.ai/instructions.md` with real index entries for the new skills and workflow; left a commented list of stack-specific skills teams commonly add on top (queries, mutations, forms, components, models, icons).
 
 ### 1.2.0 — 2026-04-22
 - Added `GEMINI.md` entry point for Gemini CLI.

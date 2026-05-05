@@ -107,6 +107,57 @@ function discoverFilesByName(dir, fileName) {
   return results;
 }
 
+function collectSourcedFiles() {
+  // Returns the list of .ai/ files that carry a `source` frontmatter marker.
+  // Used to give teams a per-file inventory of what's tracked upstream.
+  const sourced = [];
+
+  const frontmatterTargets = [
+    { dir: join(AI_DIR, 'skills'), fileName: 'SKILL.md' },
+    { dir: join(AI_DIR, 'agents'), fileName: 'AGENT.md' },
+    { dir: join(AI_DIR, 'workflow'), fileName: 'guide.md' },
+  ];
+
+  for (const { dir, fileName } of frontmatterTargets) {
+    for (const diskPath of discoverFilesByName(dir, fileName)) {
+      const fm = readFrontmatter(readFileSync(join(PROJECT_ROOT, diskPath), 'utf8'));
+      if (fm && fm.source) {
+        sourced.push({
+          path: diskPath,
+          source: fm.source,
+          version: fm.source_version || '(unversioned)',
+        });
+      }
+    }
+  }
+
+  // Context docs can have arbitrary filenames; walk the whole tree.
+  const contextDir = join(AI_DIR, 'context');
+  if (existsSync(contextDir)) {
+    const walk = (d) => {
+      for (const entry of readdirSync(d, { withFileTypes: true })) {
+        const full = join(d, entry.name);
+        if (entry.isDirectory()) {
+          walk(full);
+        } else if (entry.isFile() && entry.name.endsWith('.md')) {
+          const rel = relative(PROJECT_ROOT, full).replace(/\\/g, '/');
+          const fm = readFrontmatter(readFileSync(full, 'utf8'));
+          if (fm && fm.source) {
+            sourced.push({
+              path: rel,
+              source: fm.source,
+              version: fm.source_version || '(unversioned)',
+            });
+          }
+        }
+      }
+    };
+    walk(contextDir);
+  }
+
+  return sourced;
+}
+
 function daysSince(dateStr) {
   const then = new Date(dateStr);
   if (isNaN(then.getTime())) return Infinity;
@@ -246,6 +297,8 @@ function runChecks() {
     }
   }
 
+  const sourced = collectSourcedFiles();
+
   report(
     errors,
     warnings,
@@ -254,14 +307,23 @@ function runChecks() {
       agents: diskAgentPaths.length,
       workflows: diskWorkflowPaths.length,
     },
-    version
+    version,
+    sourced
   );
 }
 
-function report(errors, warnings, counts, version) {
+function report(errors, warnings, counts, version, sourced) {
   console.log('[ai-config] Validating .ai/ configuration...\n');
   if (version) {
     console.log(`[ai-config] Initialized from boilerplate v${version}\n`);
+  }
+
+  if (sourced && sourced.length > 0) {
+    console.log(`[ai-config] Boilerplate-sourced files (${sourced.length}):`);
+    for (const s of sourced) {
+      console.log(`  - ${s.path} (v${s.version})`);
+    }
+    console.log('');
   }
 
   if (errors.length > 0) {

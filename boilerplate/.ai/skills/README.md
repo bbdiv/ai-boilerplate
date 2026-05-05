@@ -2,6 +2,8 @@
 
 Skills are task recipes — Markdown files that tell an AI agent exactly how to implement a specific type of work in this project. They encode your team's conventions so the agent doesn't have to guess.
 
+> **Authoring a new skill?** Use the [`write-a-skill`](write-a-skill/SKILL.md) skill — it walks the agent through gather → draft → index → review. This README is the static format reference; the skill is the prescriptive process.
+
 ## When to create a skill
 
 Create a skill when:
@@ -37,19 +39,23 @@ Step-by-step instructions...
 
 > **`last_reviewed` is required.** Update it whenever you verify the skill still reflects current conventions. A skill that hasn't been reviewed after a major refactor is a liability — it gives the agent wrong guidance silently.
 
+### Optional: `source: boilerplate` marker
+
+Skills copied verbatim from the upstream boilerplate also carry two extra frontmatter fields:
+
+```yaml
+source: boilerplate
+source_version: 1.6.0
+```
+
+These identify the skill as sync-tracked with the upstream and record which version the content came from. **Don't add them to project-local skills** — the absence of the marker is what signals "this is ours, don't touch on upstream bumps." If you heavily edit a sourced skill, remove the `source` field to claim it as local.
+
 ## Definition of done for a skill
 
 A skill is only "done" when:
 - [ ] The `SKILL.md` file is written with a clear frontmatter description.
 - [ ] `last_reviewed` is set to today's date.
 - [ ] A row has been added to the skills index in `.ai/instructions.md`. **A skill with no index entry is invisible to the agent.**
-
-## Tips for writing good skills
-
-- **Be prescriptive, not descriptive.** Tell the agent what to do, not just what exists.
-- **Short descriptions in the frontmatter** — the agent scans these to decide if the skill applies.
-- **Link to related skills** when steps depend on another skill (e.g. a "create feature" skill can reference a "models" skill).
-- **Include a template or example** for tasks where structure matters (e.g. component files, query hooks).
 
 ## Example structure
 

@@ -100,6 +100,8 @@ A project with three well-written, accurate skills is more valuable than one wit
 
 **Future intent:** the boilerplate will eventually ship a set of generic skills based on common development patterns (data fetching, forms, component structure, translations, etc.). These will serve as a starting point that teams can adapt rather than write from scratch — but they won't be added until the patterns are proven stable across multiple projects.
 
+**Update (v1.3.0, 2026-04-22):** the first batch of generic skills shipped — `import-order`, `translations-typed-i18n`, the `build-feature` workflow, and Vercel's React performance rules as a context doc. These were validated across 8 internal microfrontends before being lifted into the boilerplate. The selection criterion was "applies to any React + TypeScript + i18n project" — skills tied to specific libraries (TanStack Query, TanStack Form, a specific UI kit, a specific URL filter shape) were deliberately left out to keep the boilerplate framework-agnostic within the React/TS world.
+
 ---
 
 ## 10. Known limitations
@@ -111,3 +113,32 @@ A project with three well-written, accurate skills is more valuable than one wit
 **Weaker open-source models may not follow pointer chains.** The setup of `CLAUDE.md → .ai/instructions.md → load skill` works well for capable models. Weaker models running locally may stop at the first file. For teams heavily using open-source models, inlining critical conventions (folder structure, naming, import order) directly in the entry point is more reliable than pointer chains.
 
 **Boilerplate drift.** Projects initialized from this boilerplate are snapshots. When the boilerplate improves, existing projects won't update automatically. Track which version a project was initialized from (visible in `boilerplate/README.md` changelog) and manually apply relevant changes. Long-term: move the boilerplate to a dedicated git repository.
+
+> **Partially addressed in v1.4.0** — see #11 below.
+
+---
+
+## 11. `source: boilerplate` frontmatter markers
+
+**Problem:** the drift limitation in #10 was previously tracked by hand. Teams had to remember which version they initialized from and manually diff every `.ai/` file on each upstream bump. That works for small, rarely-changing boilerplates but breaks down as the shared skill set grows.
+
+**Decision:** every file the boilerplate ships carries two frontmatter fields:
+
+```yaml
+source: boilerplate
+source_version: 1.4.0
+```
+
+Project-local files (team-authored skills, agents, workflows) **omit** the `source` field.
+
+**What the marker enables:**
+- `validate-config.mjs` prints a per-file inventory at the end of each run — you see at a glance which of your files track upstream and at what version.
+- On an upstream bump, teams can grep for `source: boilerplate` to scope the update check to just the sourced files.
+- An audit agent can compare a project's sourced files against the latest upstream and suggest replacements.
+
+**What it does NOT solve (yet):**
+- Detecting local modifications to a sourced file. If someone edits a shared skill after copying, the marker still says `boilerplate` — there's no hash to flag drift. A future `skills-lock.json` that stores content hashes at copy time would close this gap. Deferred until the need is concrete.
+
+**Why not a separate folder (`.ai/shared/`):**
+- Would duplicate the taxonomy — teams would end up with `shared/skills/` and `skills/` parallel trees, and tools auto-discovering `.ai/skills/**` would miss one of them.
+- Frontmatter is per-file and finer-grained: a team can "adopt" a shared skill by editing it and removing the marker, without moving files around.
