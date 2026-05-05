@@ -195,6 +195,22 @@ Each project initialized from this boilerplate is a snapshot. When the boilerpla
 - `skip` is a contract: a consumer that intentionally doesn't carry a sourced file must declare it. "Missing" is never silent.
 - A consumer that forks a sourced file must remove the `source: boilerplate` marker AND add the path to `skip`, so drift stops flagging it.
 
+## Claude Code plugin distribution
+
+Generic skills also ship as a Claude Code plugin under `plugins/autodoc-ai/`, distributed via the `autodoc` marketplace declared at `.claude-plugin/marketplace.json`. Devs install it once and get every skill in every Claude Code session — no per-repo copy needed.
+
+```
+/plugin marketplace add bbdiv/ai-boilerplate
+/plugin install autodoc-ai@autodoc
+```
+
+The plugin and the project boilerplate are complementary, not redundant:
+
+- **Plugin** ships skills at the user level — apply everywhere a dev works.
+- **Boilerplate** ships skills at the project level via copy — paired with project-specific `instructions.md`, agents, workflows, and context bundles that don't make sense at the user level.
+
+Project-side skills override plugin skills in any repo where both are present. See [`plugins/autodoc-ai/README.md`](plugins/autodoc-ai/README.md) for what's in the bundle and how updates flow.
+
 ## Changelog
 
 ### 1.8.0 — 2026-05-04

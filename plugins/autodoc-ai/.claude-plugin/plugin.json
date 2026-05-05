@@ -1,0 +1,9 @@
+{
+  "name": "autodoc-ai",
+  "description": "Autodoc engineering skills for Claude Code. Bundles commit conventions, plan stress-testing, skill authoring, import ordering, and typed i18n key management. Skills auto-surface as /autodoc-ai:<skill-name>.",
+  "author": {
+    "name": "Autodoc Engineering"
+  },
+  "repository": "https://github.com/bbdiv/ai-boilerplate",
+  "keywords": ["autodoc", "skills", "engineering", "conventions"]
+}
