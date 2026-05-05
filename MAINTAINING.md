@@ -2,6 +2,19 @@
 
 How to ship a change made in `boilerplate/.ai/` out to every consumer repo. Read this before each propagation.
 
+## Defaults
+
+Don't ask the user for these unless the runbook explicitly tells you to:
+
+- **Boilerplate** = this repo (`ai-boilerplate`). It is the only upstream.
+- **Consumers** = every entry in `consumers.json`. Don't ask which repos to target — the registry is the source of truth.
+- **Target branch on each consumer** = `chore/ai-boilerplate`. Standing branch, never propagate to `main` directly.
+- **What changed?** = run `pnpm drift`. Every file listed as `missing` or `behind` is in scope. Don't try to infer from `git log` or file mtimes — drift already answers this.
+- **Which propagation format?** = `consumers.json` declares `instructions_format` per consumer (`table-narrow` / `table-wide` / `bullet`). Pull the format from there; don't re-detect.
+- **Stop conditions** = an `edited` / `ahead` / `detached` flag in drift means investigate before propagating. Do not silently overwrite. See Pitfalls below.
+
+If the operator gives a non-default scope (e.g. "only mf-login this round"), respect it and note the deviation in the commit body.
+
 ## Inputs
 
 - **`consumers.json`** — registry of every consumer repo, with `path`, `stack` tags, `instructions_format` (`table-narrow` / `table-wide` / `bullet`), `skip` list, optional `notes`.
@@ -49,11 +62,13 @@ git -C <consumer-path> rev-parse --abbrev-ref HEAD
 
 If a consumer is on a different branch (e.g. an in-progress feature), stop. Either switch the consumer to `chore/ai-boilerplate` or skip it this round. A misrouted propagation is harder to clean up than skipping.
 
-A one-shot check across every consumer:
+A one-shot check across every consumer (exits non-zero if any consumer is on the wrong branch — fail-fast, do not proceed):
 
 ```
-node -e "const r=require('./consumers.json');const {execSync}=require('child_process');for(const c of r.consumers){const b=execSync('git -C '+c.path+' rev-parse --abbrev-ref HEAD').toString().trim();console.log((b==='chore/ai-boilerplate'?'OK ':'!! ')+c.name+'  '+b)}"
+node -e "const r=require('./consumers.json');const {execSync}=require('child_process');let bad=0;for(const c of r.consumers){const b=execSync('git -C '+c.path+' rev-parse --abbrev-ref HEAD').toString().trim();const ok=b==='chore/ai-boilerplate';if(!ok)bad++;console.log((ok?'OK ':'!! ')+c.name+'  '+b)}if(bad){console.error('\\n'+bad+' consumer(s) not on chore/ai-boilerplate. Stop.');process.exit(1)}"
 ```
+
+If this command exits non-zero, do not move on to step 4. Either switch the offending consumers to `chore/ai-boilerplate` (after committing or stashing their current work), or scope this round to skip them and note the deviation.
 
 ### 4. Apply the change
 
@@ -135,11 +150,38 @@ Skip the helper for any consumer where you intentionally added extra changes (un
 
 ### 6. Push + open PRs
 
+**Push first.** Per consumer:
+
 ```
-git -C <consumer-path> push
+git -C <consumer-path> push -u origin chore/ai-boilerplate
 ```
 
-Open one PR per consumer against its default branch. The PR title can mirror the commit subject. Body should reference the upstream changelog entry in `README.md`.
+Or batch:
+
+```
+node -e "const r=require('./consumers.json');const {execSync}=require('child_process');for(const c of r.consumers){try{execSync('git -C '+c.path+' push -u origin chore/ai-boilerplate',{stdio:'inherit'})}catch(_){console.error('push failed: '+c.name)}}"
+```
+
+**Then open PRs.** Each consumer gets one PR against its default branch. Title mirrors the commit subject; body links the upstream changelog entry in `ai-boilerplate/README.md`. Use `gh` (must be installed and authed against `autodocdev`):
+
+```
+gh pr create \
+  --repo autodocdev/<consumer-name> \
+  --base <default-branch> \
+  --head chore/ai-boilerplate \
+  --title "chore(ai-config): sync <skill> from boilerplate v<X.Y.Z>" \
+  --body "Sync \`<skill>\` from boilerplate v<X.Y.Z>. See changelog: https://github.com/bbdiv/ai-boilerplate/blob/main/README.md#<X-Y-0>--<YYYY-MM-DD>."
+```
+
+Batch helper — opens one PR per consumer, skipping any that already have an open PR for the head branch:
+
+```
+node -e "const r=require('./consumers.json');const {execSync}=require('child_process');const skill=process.argv[1];const ver=process.argv[2];const link=process.argv[3];for(const c of r.consumers){const repo='autodocdev/'+c.name;try{const existing=execSync('gh pr list --repo '+repo+' --head chore/ai-boilerplate --json number --jq length').toString().trim();if(existing!=='0'){console.log('skip (PR exists): '+c.name);continue}}catch(_){console.error('gh pr list failed: '+c.name);continue}try{execSync('gh pr create --repo '+repo+' --head chore/ai-boilerplate --title '+JSON.stringify('chore(ai-config): sync '+skill+' from boilerplate v'+ver)+' --body '+JSON.stringify('Sync \`'+skill+'\` from boilerplate v'+ver+'. Changelog: '+link),{stdio:'inherit'})}catch(_){console.error('pr create failed: '+c.name)}}" "<skill>" "<X.Y.Z>" "<changelog-url>"
+```
+
+Default branch detection isn't automated — pass it explicitly per consumer if it's not the conventional `main`. To inspect: `gh repo view autodocdev/<consumer> --json defaultBranchRef --jq .defaultBranchRef.name`.
+
+After all PRs are open, paste the URLs into the boilerplate-side tracking issue (or the PR description on the upstream `feat/...` branch) so reviewers can sweep them in one pass.
 
 ### 7. Re-run drift to confirm
 
